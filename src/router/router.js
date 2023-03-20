@@ -3,6 +3,8 @@ import {createRouter, createWebHistory} from "vue-router";
 import Main from "@/pages/Main.vue";
 import Counter from "@/pages/Counter.vue";
 import Notes from "@/pages/Notes.vue";
+import NotesLC from "@/pages/NotesLC.vue";
+import NotFound from "@/pages/NotFound.vue";
 
 const routes = [
 	{
@@ -16,6 +18,14 @@ const routes = [
 	{
 		path: '/notes',
 		component: Notes
+	},
+	{
+		path: '/noteslc',
+		component: NotesLC
+	},
+	{
+		path: '/:pathMatch(.*)*',
+		component: NotFound
 	}
 ]
 

@@ -27,40 +27,69 @@
 </template>
 
 <script>
+
+function noteSort(a, b) {
+	if (a.date > b.date) return -1;
+	if (a.date === b.date) return 0;
+	if (a.date < b.date) return 1;
+}
 export default {
 	name: "Notes",
 	data() {
 		return {
 			dateOptions: { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' },
-			title: 'Notes list:',
+			title: 'Notes list LC:',
 			placeholderStr: 'Note name',
 			inputValue: '',
 			noNotes: 'No notes, add one',
+			notesCounter: 0,
+			idPrefix: 'noteId-',
 			notes: []
 		}
 	},
 	mounted() {
-		if (localStorage.notes) {
-			this.notes = JSON.parse(localStorage.notes)
+		const notesList = []
+		Object.keys(localStorage).filter((item) => {
+			if (item.includes(this.idPrefix)) {
+				notesList.unshift(JSON.parse(localStorage[item]))
+			}
+		})
+
+		if (notesList.length !== 0) {
+			this.notes = notesList.sort(noteSort);
+			this.notesCounter = +localStorage.notesCounter
+		} else if (this.notes.length !== 0) {
+			this.notes.sort(noteSort)
+			let maxId = 0;
+			for (let note of this.notes) {
+				maxId = maxId > note.id ? maxId : note.id
+
+				localStorage.setItem(note.idLc, JSON.stringify(note))
+				localStorage.setItem('notesCounter', String(maxId))
+				this.notesCounter = maxId
+			}
 		} else {
-			localStorage.setItem('notes', this.notes)
+			localStorage.setItem('notesCounter', String(this.notesCounter))
 		}
 	},
 	methods: {
 		addNewNote() {
 			if (this.inputValue !== '') {
-				this.notes.unshift({
-					id: this.notes.length + 1,
+				const id = +(++this.notesCounter);
+				const note = {
+					id,
 					title: this.inputValue,
 					date: Date.now()
-				})
+				}
+				this.notes.unshift(note)
 				this.inputValue = ''
-				localStorage.setItem('notes', JSON.stringify(this.notes))
+				localStorage.setItem('notesCounter', id)
+				localStorage.setItem(this.idPrefix + id, JSON.stringify(note))
 			}
 		},
 		removeNote(id) {
 			this.notes = this.notes.filter((el) => el.id !== id);
-			localStorage.setItem('notes', JSON.stringify(this.notes))
+			localStorage.removeItem(this.idPrefix + id)
 		},
 		dateFormat(date) {
 			return new Date(+date).toLocaleString('ru-RU', this.dateOptions)

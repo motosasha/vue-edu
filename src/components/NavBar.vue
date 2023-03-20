@@ -2,7 +2,8 @@
 	<div class="flex gap-5">
 		<router-link to="/" class="nav-link">Home</router-link>
 		<router-link to="/counter" class="nav-link">Counter</router-link>
-		<router-link to="/notes" class="nav-link">Notes</router-link>
+		<router-link to="/notes" class="nav-link">Notes (lc-one)</router-link>
+		<router-link to="/noteslc" class="nav-link">Notes (lc-many)</router-link>
 	</div>
 </template>
 
