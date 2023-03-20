@@ -55,16 +55,16 @@ export default {
 			}
 		})
 
-		if (notesList.length !== 0) {
+		if (notesList.length) {
 			this.notes = notesList.sort(noteSort);
 			this.notesCounter = +localStorage.notesCounter
-		} else if (this.notes.length !== 0) {
+		} else if (this.notes.length) {
 			this.notes.sort(noteSort)
 			let maxId = 0;
 			for (let note of this.notes) {
 				maxId = maxId > note.id ? maxId : note.id
 
-				localStorage.setItem(note.idLc, JSON.stringify(note))
+				localStorage.setItem(this.idPrefix + note.id, JSON.stringify(note))
 				localStorage.setItem('notesCounter', String(maxId))
 				this.notesCounter = maxId
 			}

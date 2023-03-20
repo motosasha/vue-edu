@@ -27,6 +27,13 @@
 </template>
 
 <script>
+function noteSort(a, b) {
+	if (a.date > b.date) return -1;
+	if (a.date === b.date) return 0;
+	if (a.date < b.date) return 1;
+}
+
+let maxId = 0;
 export default {
 	name: "Notes",
 	data() {
@@ -36,31 +43,48 @@ export default {
 			placeholderStr: 'Note name',
 			inputValue: '',
 			noNotes: 'No notes, add one',
+			noteCounter: 0,
+			idPrefix: 'noteId-',
 			notes: []
 		}
 	},
 	mounted() {
 		if (localStorage.notes) {
-			this.notes = JSON.parse(localStorage.notes)
+			this.notes = JSON.parse(localStorage.notes).sort(noteSort)
+			this.noteCounter = +localStorage.noteCounter
+		} else if (this.notes) {
+			this.notes.sort(noteSort)
+			for (let note of this.notes) {
+				maxId = maxId > note.id ? maxId : note.id
+			}
+			this.noteCounter = maxId
+			localStorage.setItem('noteCounter', String(maxId))
+			localStorage.setItem('notes', String(this.notes))
 		} else {
-			localStorage.setItem('notes', this.notes)
+			localStorage.setItem('noteCounter', String(this.noteCounter))
 		}
 	},
 	methods: {
 		addNewNote() {
 			if (this.inputValue !== '') {
+				this.noteCounter = +localStorage.noteCounter
 				this.notes.unshift({
-					id: this.notes.length + 1,
+					id: this.noteCounter + 1,
 					title: this.inputValue,
 					date: Date.now()
 				})
 				this.inputValue = ''
+				localStorage.setItem('noteCounter', String(++this.noteCounter))
 				localStorage.setItem('notes', JSON.stringify(this.notes))
 			}
 		},
 		removeNote(id) {
 			this.notes = this.notes.filter((el) => el.id !== id);
 			localStorage.setItem('notes', JSON.stringify(this.notes))
+			if (!this.notes) {
+				this.noteCounter = 0
+				localStorage.setItem('noteCounter', String(0))
+			}
 		},
 		dateFormat(date) {
 			return new Date(+date).toLocaleString('ru-RU', this.dateOptions)
