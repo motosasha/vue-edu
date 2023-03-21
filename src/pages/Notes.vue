@@ -1,5 +1,5 @@
 <template>
-	<h1 class="text-6xl">{{ title }}</h1>
+	<h1 class="text-6xl">Notes list:</h1>
 	<div class="max-w-lg">
 		<div class="flex gap-4 my-8">
 			<input
@@ -7,13 +7,13 @@
       focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500
       text-slate-800"
 				type="text"
-				:placeholder="placeholderStr"
+				placeholder="Note name"
 				v-model="inputValue"
 				@keypress.enter="addNewNote"
 			>
 			<button class="px-10 py-3 font-semibold bg-amber-700 text-white rounded-lg hover:bg-amber-800 disabled:bg-slate-700 disabled:text-slate-500" @click="addNewNote" :disabled="!inputValue">Add</button>
 		</div>
-		<div class="border border-slate-600 text-center p-4 rounded-xl" v-if="notes.length === 0" v-text="noNotes"></div>
+		<div class="border border-slate-600 text-center p-4 rounded-xl" v-if="notes.length === 0">No notes, add one</div>
 		<ul class="flex flex-col gap-5" v-else>
 			<li class="bg-slate-300 rounded-xl text-slate-800 p-3 pl-5 flex items-center justify-between" v-for="note in notes" :key="note.date">
 				<div class="flex-col gap-4">
@@ -27,33 +27,25 @@
 </template>
 
 <script>
-function noteSort(a, b) {
-	if (a.date > b.date) return -1;
-	if (a.date === b.date) return 0;
-	if (a.date < b.date) return 1;
-}
+import {dateSort} from "@/functions/dateSort";
+import {dateFormat} from "@/functions/dateFormat";
 
 let maxId = 0;
 export default {
 	name: "Notes",
 	data() {
 		return {
-			dateOptions: { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric' },
-			title: 'Notes list:',
-			placeholderStr: 'Note name',
 			inputValue: '',
-			noNotes: 'No notes, add one',
 			noteCounter: 0,
-			idPrefix: 'noteId-',
 			notes: []
 		}
 	},
 	mounted() {
 		if (localStorage.notes) {
-			this.notes = JSON.parse(localStorage.notes).sort(noteSort)
+			this.notes = JSON.parse(localStorage.notes).sort(dateSort)
 			this.noteCounter = +localStorage.noteCounter
 		} else if (this.notes) {
-			this.notes.sort(noteSort)
+			this.notes.sort(dateSort)
 			for (let note of this.notes) {
 				maxId = maxId > note.id ? maxId : note.id
 			}
@@ -81,13 +73,13 @@ export default {
 		removeNote(id) {
 			this.notes = this.notes.filter((el) => el.id !== id);
 			localStorage.setItem('notes', JSON.stringify(this.notes))
-			if (!this.notes) {
+			if (!this.notes.length) {
 				this.noteCounter = 0
 				localStorage.setItem('noteCounter', String(0))
 			}
 		},
 		dateFormat(date) {
-			return new Date(+date).toLocaleString('ru-RU', this.dateOptions)
+			return dateFormat(date)
 		},
 	}
 }
